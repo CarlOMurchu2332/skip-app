@@ -1,24 +1,21 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Lazy initialization to avoid build-time errors
-let _supabase: ReturnType<typeof createClient> | null = null;
-
-// Client-side Supabase client - getter function
-export function getSupabaseClient() {
-  if (!_supabase) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    _supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Getter function for lazy initialization
+function getSupabaseClient() {
+  // Use empty strings as fallback for build time, will be populated at runtime
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    // Return a dummy client for build time - will never be called at runtime
+    return createClient('https://placeholder.supabase.co', 'placeholder-key');
   }
-  return _supabase;
+  
+  return createClient(supabaseUrl, supabaseAnonKey);
 }
 
-// For backwards compatibility
-export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
-  get(target, prop) {
-    return getSupabaseClient()[prop as keyof ReturnType<typeof createClient>];
-  }
-});
+// Export client - will be initialized on first use
+export const supabase = getSupabaseClient();
 
 // Server-side Supabase client with service role key (for API routes)
 export function createServerSupabaseClient() {
