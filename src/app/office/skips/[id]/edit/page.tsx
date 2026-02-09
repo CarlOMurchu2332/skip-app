@@ -52,7 +52,7 @@ export default function EditSkipJobPage() {
         if (driversRes.data) setDrivers(driversRes.data);
         
         if (jobRes.data) {
-          const j = jobRes.data;
+          const j = jobRes.data as SkipJob;
           setJob(j);
           
           // Populate form with existing values
