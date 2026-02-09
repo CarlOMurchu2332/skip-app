@@ -37,7 +37,7 @@ export async function generateDocketPdf(data: PdfData): Promise<Uint8Array> {
         height: Math.min(logoDims.height, 60),
       });
     }
-  } catch (e) {
+  } catch {
     // Logo not found, continue without it
   }
 
@@ -306,3 +306,4 @@ export async function generateDocketPdf(data: PdfData): Promise<Uint8Array> {
 
   return await pdfDoc.save();
 }
+

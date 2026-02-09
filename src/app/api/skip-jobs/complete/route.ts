@@ -127,16 +127,6 @@ export async function POST(request: NextRequest) {
         const actionLabel = SKIP_ACTIONS.find((a) => a.value === action)?.label || action;
         const pickLabel = pick_size ? SKIP_SIZES.find((s) => s.value === pick_size)?.label : null;
         const dropLabel = drop_size ? SKIP_SIZES.find((s) => s.value === drop_size)?.label : null;
-        const pickLocation = (action === 'pick' || action === 'pick_drop') && !Number.isNaN(yardLat) && !Number.isNaN(yardLng)
-          ? `${yardLat.toFixed(6)}, ${yardLng.toFixed(6)} (Yard)`
-          : "";
-        const dropLocation = (action === 'drop' || action === 'pick_drop') && lat && lng
-          ? `${lat.toFixed(6)}, ${lng.toFixed(6)} (Site)`
-          : "";
-
-        const dropMapLink = (action === 'drop' || action === 'pick_drop') && lat && lng 
-          ? `https://www.google.com/maps?q=${lat},${lng}` 
-          : null;
         const completionMapLink = lat && lng ? `https://www.google.com/maps?q=${lat},${lng}` : null;
 
         let locationSection = '';
@@ -215,3 +205,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

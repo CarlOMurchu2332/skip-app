@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
-import { CreateJobRequest } from '@/lib/types';
 import { sendJobNotification } from '@/lib/twilio';
 
 export async function POST(request: NextRequest) {
@@ -92,3 +91,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

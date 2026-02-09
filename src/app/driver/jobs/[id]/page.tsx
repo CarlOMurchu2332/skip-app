@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
@@ -12,7 +12,6 @@ type Step = 'details' | 'start_config' | 'size' | 'action' | 'confirm' | 'succes
 
 export default function DriverJobDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const jobId = params.id as string;
 
   const [job, setJob] = useState<SkipJob | null>(null);
@@ -861,3 +860,4 @@ export default function DriverJobDetailPage() {
     </div>
   );
 }
+

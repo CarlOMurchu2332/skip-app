@@ -130,7 +130,7 @@ export default function SkipJobsListPage() {
 
         {/* Today's summary */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <h2 className="text-lg font-semibold mb-2">Today's Jobs</h2>
+          <h2 className="text-lg font-semibold mb-2">Today’s Jobs</h2>
           <div className="flex gap-4 text-sm">
             <span className="px-3 py-1 bg-gray-100 rounded-full">
               Total: {todayJobs.length}
@@ -329,3 +329,4 @@ export default function SkipJobsListPage() {
     </div>
   );
 }
+
