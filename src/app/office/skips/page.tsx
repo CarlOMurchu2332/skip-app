@@ -167,7 +167,7 @@ export default function SkipJobsListPage() {
         {/* Jobs list */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {filteredJobs.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-gray-500">
               No jobs found. Create your first job!
             </div>
           ) : (
