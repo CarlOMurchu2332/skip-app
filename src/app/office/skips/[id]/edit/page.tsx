@@ -38,18 +38,22 @@ export default function EditSkipJobPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [customersRes, driversRes, jobRes] = await Promise.all([
-          supabase.from('customers').select('*').order('name'),
-          supabase.from('drivers').select('*').eq('is_active', true).order('name'),
-          supabase.from('skip_jobs').select(`
+        const customersPromise = supabase.from('customers').select('*').order('name');
+        const driversPromise = supabase.from('drivers').select('*').eq('is_active', true).order('name');
+        const jobPromise = supabase.from('skip_jobs').select(`
             *,
             customer:customers(*),
             driver:drivers(*)
-          `).eq('id', jobId).single(),
-        ]) as [any, any, any];
+          `).eq('id', jobId).single();
 
-        if (customersRes.data) setCustomers(customersRes.data);
-        if (driversRes.data) setDrivers(driversRes.data);
+        const [customersRes, driversRes, jobRes] = await Promise.all([
+          customersPromise,
+          driversPromise,
+          jobPromise,
+        ]);
+
+        if (customersRes.data) setCustomers(customersRes.data as Customer[]);
+        if (driversRes.data) setDrivers(driversRes.data as Driver[]);
         
         if (jobRes.data) {
           const j = jobRes.data as SkipJob;
