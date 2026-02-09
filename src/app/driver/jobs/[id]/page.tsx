@@ -54,17 +54,18 @@ export default function DriverJobDetailPage() {
           return;
         }
 
-        setJob(data);
+        const jobData = data as SkipJob;
+        setJob(jobData);
         
         // Pre-select values from job if set by office
-        if (data.office_action) {
-          setAction(data.office_action);
+        if (jobData.office_action) {
+          setAction(jobData.office_action);
         }
-        if (data.skip_size) {
-          setSkipSize(data.skip_size);
+        if (jobData.skip_size) {
+          setSkipSize(jobData.skip_size);
         }
-        if (data.truck_type) {
-          setTruckType(data.truck_type);
+        if (jobData.truck_type) {
+          setTruckType(jobData.truck_type);
         }
       } catch (err) {
         console.error('Error loading job:', err);
