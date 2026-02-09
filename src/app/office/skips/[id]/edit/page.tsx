@@ -46,7 +46,7 @@ export default function EditSkipJobPage() {
             customer:customers(*),
             driver:drivers(*)
           `).eq('id', jobId).single(),
-        ]);
+        ]) as [any, any, any];
 
         if (customersRes.data) setCustomers(customersRes.data);
         if (driversRes.data) setDrivers(driversRes.data);
