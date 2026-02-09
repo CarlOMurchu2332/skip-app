@@ -1,0 +1,102 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabaseClient } from '@/lib/supabase';
+import { sendSms, formatPhoneNumber } from '@/lib/twilio';
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { job_id } = body;
+
+    if (!job_id) {
+      return NextResponse.json(
+        { error: 'Missing job_id' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = createServerSupabaseClient();
+
+    // Get job with driver info
+    const { data: job, error: jobError } = await supabase
+      .from('skip_jobs')
+      .select(`
+        *,
+        customer:customers(name),
+        driver:drivers(name, phone)
+      `)
+      .eq('id', job_id)
+      .single();
+
+    if (jobError || !job) {
+      return NextResponse.json(
+        { error: 'Job not found' },
+        { status: 404 }
+      );
+    }
+
+    if (job.status === 'completed') {
+      return NextResponse.json(
+        { error: 'Job already completed' },
+        { status: 400 }
+      );
+    }
+
+    // Build driver link
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const driverLink = `${appUrl}/driver/skip/${job.job_token}`;
+
+    // Send SMS notification via Twilio
+    let messageSent = false;
+    
+    if (job.driver?.phone) {
+      const formattedPhone = formatPhoneNumber(job.driver.phone);
+      console.log('=== SMS DEBUG ===');
+      console.log('To Number (raw):', job.driver.phone);
+      console.log('To Number (formatted):', formattedPhone);
+      
+      const message = `🚛 New Skip Job\n\nCustomer: ${job.customer?.name || 'Customer'}\nDate: ${job.job_date}\n\nOpen to complete: ${driverLink}`;
+      
+      const result = await sendSms({ to: formattedPhone, message });
+      messageSent = result.success;
+      
+      if (result.success) {
+        console.log('SMS sent successfully! SID:', result.sid);
+      } else {
+        console.error('SMS FAILED:', result.error);
+      }
+    } else {
+      console.error('Missing driver phone');
+    }
+
+    // Update job status to 'sent'
+    const { data: updatedJob, error: updateError } = await supabase
+      .from('skip_jobs')
+      .update({
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+      })
+      .eq('id', job_id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Job update error:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to update job status' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      job: updatedJob,
+      message_sent: messageSent,
+      driver_link: driverLink,
+    });
+  } catch (error) {
+    console.error('Send job error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
