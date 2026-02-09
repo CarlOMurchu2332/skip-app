@@ -48,13 +48,15 @@ export default function DriverCompletionPage() {
           return;
         }
 
-        if (data.status === 'completed') {
+        const jobData = data as SkipJob;
+
+        if (jobData.status === 'completed') {
           setStep('error');
           setError('This job has already been completed');
           return;
         }
 
-        setJob(data);
+        setJob(jobData);
       } catch (err) {
         console.error('Error loading job:', err);
         setStep('error');
