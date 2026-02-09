@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase';
-import { sendSms, formatPhoneNumber } from '@/lib/twilio';
+import { sendJobNotification } from '@/lib/twilio';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,20 +51,16 @@ export async function POST(request: NextRequest) {
     let messageSent = false;
     
     if (job.driver?.phone) {
-      const formattedPhone = formatPhoneNumber(job.driver.phone);
-      console.log('=== SMS DEBUG ===');
-      console.log('To Number (raw):', job.driver.phone);
-      console.log('To Number (formatted):', formattedPhone);
-      
-      const message = `🚛 New Skip Job\n\nCustomer: ${job.customer?.name || 'Customer'}\nDate: ${job.job_date}\n\nOpen to complete: ${driverLink}`;
-      
-      const result = await sendSms({ to: formattedPhone, message });
+      const result = await sendJobNotification(
+        job.driver.phone,
+        job.customer?.name || 'Unknown Customer',
+        job.customer?.address,
+        job.docket_no
+      );
       messageSent = result.success;
       
-      if (result.success) {
-        console.log('SMS sent successfully! SID:', result.sid);
-      } else {
-        console.error('SMS FAILED:', result.error);
+      if (!result.success) {
+        console.error('Failed to send SMS notification:', result.error);
       }
     } else {
       console.error('Missing driver phone');

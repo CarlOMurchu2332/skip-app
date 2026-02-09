@@ -4,6 +4,8 @@ import nodemailer from 'nodemailer';
 import { generateDocketPdf } from '@/lib/pdf';
 import { CompleteJobRequest, SKIP_SIZES, SKIP_ACTIONS } from '@/lib/types';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const body: CompleteJobRequest = await request.json();
