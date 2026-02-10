@@ -17,6 +17,23 @@ interface SkipLocation {
   action: string;
 }
 
+interface CompletionWithJob {
+  action: string;
+  drop_size?: string;
+  pick_size?: string;
+  completed_time: string;
+  skip_job?: {
+    docket_no?: string;
+    customer?: {
+      name?: string;
+      address?: string;
+    };
+    driver?: {
+      name?: string;
+    };
+  };
+}
+
 export default function SkipTrackerPage() {
   const [locations, setLocations] = useState<SkipLocation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +65,8 @@ export default function SkipTrackerPage() {
 
       const skipLocations: SkipLocation[] = [];
       
-      (data || []).forEach((completion) => {
-        const job = completion.skip_job as any;
+      (data || []).forEach((completion: CompletionWithJob) => {
+        const job = completion.skip_job;
         
         // If action includes drop, skip is on site
         if (completion.action === 'drop' || completion.action === 'pick_drop') {
