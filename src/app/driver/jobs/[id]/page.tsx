@@ -26,9 +26,6 @@ export default function DriverJobDetailPage() {
   const [truckType, setTruckType] = useState<TruckType | null>(null);
   const [action, setAction] = useState<SkipAction | null>(null);
   const [customerSignature, setCustomerSignature] = useState('');
-  
-  // GPS state
-  const [gpsStatus, setGpsStatus] = useState<'pending' | 'captured' | 'denied' | 'error'>('pending');
 
   useEffect(() => {
     async function loadJob() {
