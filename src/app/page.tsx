@@ -56,7 +56,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="max-w-2xl w-full">
         {/* Logo */}
         <div className="flex justify-center mb-12">
