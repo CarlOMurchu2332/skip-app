@@ -27,24 +27,18 @@ UPDATE drivers
 SET phone = '0833248236' 
 WHERE name = 'Stephen McKiernan';
 
--- Note: To create the users, run these commands in Supabase SQL Editor:
--- 
--- Driver user:
--- INSERT INTO auth.users (email, encrypted_password, email_confirmed_at)
--- VALUES ('stephenmck5@gmail.com', crypt('grumpy2026', gen_salt('bf')), NOW());
--- 
--- INSERT INTO user_roles (user_id, role)
--- SELECT id, 'driver' FROM auth.users WHERE email = 'stephenmck5@gmail.com';
+-- NOTE: To create users, go to Supabase Dashboard > Authentication > Users
+-- Then manually add the users with the credentials in AUTHENTICATION_SETUP.md
+-- After creating users, assign roles by running these INSERT statements separately:
 --
--- Office users:
--- INSERT INTO auth.users (email, encrypted_password, email_confirmed_at)
--- VALUES ('carl@irishmetals.ie', crypt('KqZ@12g83', gen_salt('bf')), NOW());
+-- For driver (stephenmck5@gmail.com):
+--   INSERT INTO user_roles (user_id, role)
+--   SELECT id, 'driver' FROM auth.users WHERE email = 'stephenmck5@gmail.com';
 --
--- INSERT INTO user_roles (user_id, role)
--- SELECT id, 'office' FROM auth.users WHERE email = 'carl@irishmetals.ie';
+-- For office (carl@irishmetals.ie):
+--   INSERT INTO user_roles (user_id, role)
+--   SELECT id, 'office' FROM auth.users WHERE email = 'carl@irishmetals.ie';
 --
--- INSERT INTO auth.users (email, encrypted_password, email_confirmed_at)
--- VALUES ('conor@irishmetals.ie', crypt('K@yden3714', gen_salt('bf')), NOW());
---
--- INSERT INTO user_roles (user_id, role)
--- SELECT id, 'office' FROM auth.users WHERE email = 'conor@irishmetals.ie';
+-- For office (conor@irishmetals.ie):
+--   INSERT INTO user_roles (user_id, role)
+--   SELECT id, 'office' FROM auth.users WHERE email = 'conor@irishmetals.ie';

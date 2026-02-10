@@ -235,23 +235,9 @@ export default function DriverJobDetailPage() {
     );
   }
 
-  // Success state
+  // Success state - Show celebration!
   if (step === 'success') {
-    return (
-      <div className="min-h-screen flex items-center justify-center  p-4">
-        <div className="text-center">
-          <div className="text-8xl mb-4">✅</div>
-          <h1 className="text-3xl font-bold text-white mb-2">Job Completed!</h1>
-          <p className="text-green-200 text-lg">Docket sent to office</p>
-          <Link 
-            href="/driver/jobs"
-            className="mt-6 inline-block px-6 py-3 bg-green-700 hover:bg-green-600 rounded-lg font-medium"
-          >
-            Back to Jobs
-          </Link>
-        </div>
-      </div>
-    );
+    return <Celebration />;
   }
 
   const isCompleted = job?.status === 'completed';
@@ -446,24 +432,14 @@ export default function DriverJobDetailPage() {
               </button>
             )}
 
-            {/* Start Job Button */}
-            {canStart && (
-              <button
-                onClick={() => setStep('start_config')}
-                className="w-full py-4 bg-yellow-600 hover:bg-yellow-700 rounded-xl text-lg font-bold flex items-center justify-center gap-2"
-              >
-                <span>▶️</span> Start Job
-              </button>
-            )}
-
-            {/* Complete Job Button */}
+            {/* Complete Job Button - One unified action */}
             {(isInProgress || canStart) && (
               <button
                 onClick={() => {
-                  // Reset pick/drop sizes when entering confirm
+                  // Reset pick/drop sizes when entering complete
                   setPickSize(null);
                   setDropSize(null);
-                  setStep('confirm');
+                  setStep('complete');
                 }}
                 className="w-full py-5 bg-green-600 hover:bg-green-700 rounded-xl text-xl font-bold flex items-center justify-center gap-2"
               >
@@ -474,8 +450,8 @@ export default function DriverJobDetailPage() {
         </div>
       )}
 
-      {/* Step: Start Job Config - Select skip size, truck type, action */}
-      {step === 'start_config' && (
+      {/* Step: Complete - Unified job completion on one page */}
+      {step === 'complete' && (
         <div className="p-4">
           <div className="mb-4">
             <button
@@ -594,189 +570,6 @@ export default function DriverJobDetailPage() {
         </div>
       )}
 
-      {/* Step: Confirm */}
-      {step === 'confirm' && (
-        <div className="p-4">
-          <div className="mb-4">
-            <button
-              onClick={() => setStep('details')}
-              className="text-blue-400 text-sm flex items-center gap-1"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Details
-            </button>
-          </div>
-
-          <h2 className="text-xl font-semibold mb-4 text-center">Confirm Job Completion</h2>
-
-          {/* Summary */}
-          <div className="bg-gray-600/40 rounded-lg p-4 mb-4 space-y-2 border border-gray-500/40">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Customer:</span>
-              <span className="font-bold">{job?.customer?.name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Docket:</span>
-              <span className="font-bold">{job?.docket_no}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Skip Size:</span>
-              <span className="font-bold">{SKIP_SIZES.find(s => s.value === skipSize)?.label || '-'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Action:</span>
-              <span className="font-bold">{SKIP_ACTIONS.find(a => a.value === action)?.label}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Time:</span>
-              <span className="font-bold">{new Date().toLocaleTimeString('en-IE')}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Date:</span>
-              <span className="font-bold">{new Date().toLocaleDateString('en-IE')}</span>
-            </div>
-          </div>
-
-          {action === 'pick_drop' && (
-            <div className="bg-gray-600/40 rounded-lg p-4 mb-4 space-y-3 border border-gray-500/40">
-              <div>
-                <label className="block text-sm text-gray-400 mb-2">Removed Skip Size</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {SKIP_SIZES.map((size) => (
-                    <button
-                      key={`pick-${size.value}`}
-                      onClick={() => setPickSize(size.value)}
-                      className={`py-2 rounded-lg font-bold ${pickSize === size.value ? 'bg-red-600' : 'bg-gray-500/60'}`}
-                    >
-                      {size.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-2">Left on Site (New Skip)</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {SKIP_SIZES.map((size) => (
-                    <button
-                      key={`drop-${size.value}`}
-                      onClick={() => setDropSize(size.value)}
-                      className={`py-2 rounded-lg font-bold ${dropSize === size.value ? 'bg-green-600' : 'bg-gray-500/60'}`}
-                    >
-                      {size.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {action === 'drop' && (
-            <div className="bg-gray-600/40 rounded-lg p-4 mb-4 space-y-3 border border-gray-500/40">
-              <label className="block text-sm text-gray-400 mb-2">Skip Size Left on Site</label>
-              <div className="grid grid-cols-3 gap-2">
-                {SKIP_SIZES.map((size) => (
-                  <button
-                    key={`drop-only-${size.value}`}
-                    onClick={() => setDropSize(size.value)}
-                    className={`py-2 rounded-lg font-bold ${dropSize === size.value ? 'bg-green-600' : 'bg-gray-500/60'}`}
-                  >
-                    {size.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {action === 'pick' && (
-            <div className="bg-gray-600/40 rounded-lg p-4 mb-4 space-y-3 border border-gray-500/40">
-              <label className="block text-sm text-gray-400 mb-2">Skip Size Removed</label>
-              <div className="grid grid-cols-3 gap-2">
-                {SKIP_SIZES.map((size) => (
-                  <button
-                    key={`pick-only-${size.value}`}
-                    onClick={() => setPickSize(size.value)}
-                    className={`py-2 rounded-lg font-bold ${pickSize === size.value ? 'bg-red-600' : 'bg-gray-500/60'}`}
-                  >
-                    {size.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* GPS Status */}
-          <div className="bg-gray-600/40 rounded-lg p-4 mb-4 border border-gray-500/40">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">Location:</span>
-              <div>
-                {gpsStatus === 'pending' && (
-                  <span className="text-yellow-400">📍 Requesting...</span>
-                )}
-                {gpsStatus === 'captured' && (
-                  <span className="text-green-400">✅ GPS captured</span>
-                )}
-                {gpsStatus === 'denied' && (
-                  <span className="text-orange-400">⚠️ GPS not captured</span>
-                )}
-                {gpsStatus === 'error' && (
-                  <span className="text-red-400">❌ GPS unavailable</span>
-                )}
-              </div>
-            </div>
-            {gpsStatus === 'denied' && (
-              <button
-                onClick={requestLocation}
-                className="mt-2 text-sm text-blue-400 underline"
-              >
-                Try again
-              </button>
-            )}
-          </div>
-
-          {/* Notes */}
-          <div className="mb-4">
-            <label className="block text-sm text-gray-400 mb-1">
-              Notes (optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-              className="w-full px-3 py-2 bg-gray-500/40 border border-gray-500/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Any issues or comments..."
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm text-gray-400 mb-1">
-              Customer Signature (name)
-            </label>
-            <input
-              value={customerSignature}
-              onChange={(e) => setCustomerSignature(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-500/40 border border-gray-500/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Customer name"
-            />
-          </div>
-
-          {error && (
-            <div className={`mb-4 p-3 rounded-lg ${pendingSync ? 'bg-yellow-900/50 text-yellow-200' : 'bg-red-900/50 text-red-200'}`}>
-              {error}
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmitCompletion}
-            disabled={submitting}
-            className="w-full py-5 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 rounded-xl text-2xl font-bold transition-colors active:scale-95"
-          >
-            {submitting ? 'Submitting...' : '✓ Confirm & Complete'}
-          </button>
-        </div>
-      )}
       
       {/* Bottom Navigation */}
       <BottomNav />
