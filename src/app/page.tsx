@@ -1,10 +1,20 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Force fresh deployment
 export default function HomePage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="text-center">
+        <div className="mb-6 flex justify-center">
+          <Image
+            src="/imr-logo.png"
+            alt="Irish Metals Logo"
+            width={220}
+            height={80}
+            priority
+          />
+        </div>
         <h1 className="text-4xl font-bold text-white mb-2">Skip App</h1>
         <p className="text-gray-400 mb-8">Irish Metals Dispatch System</p>
         

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { SkipJob, STATUS_COLORS, JobStatus, SKIP_SIZES } from '@/lib/types';
 
@@ -119,7 +120,16 @@ export default function SkipJobsListPage() {
       <div className="max-w-6xl mx-auto px-4 pb-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-white">Skip Jobs</h1>
+          <div className="flex items-center gap-4">
+            <Image
+              src="/imr-logo.png"
+              alt="Irish Metals Logo"
+              width={140}
+              height={50}
+              priority
+            />
+            <h1 className="text-2xl font-bold text-white">Skip Jobs</h1>
+          </div>
           <a
             href="/office/skips/new"
             className="px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700"
@@ -329,4 +339,5 @@ export default function SkipJobsListPage() {
     </div>
   );
 }
+
 
