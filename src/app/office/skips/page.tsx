@@ -8,14 +8,17 @@ import { SkipJob, STATUS_COLORS, JobStatus, SKIP_SIZES } from '@/lib/types';
 export default function SkipJobsListPage() {
   const [jobs, setJobs] = useState<SkipJob[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<JobStatus | 'all'>('all');
+  const [lastSync, setLastSync] = useState<Date | null>(null);
 
   useEffect(() => {
     loadJobs();
   }, []);
 
-  async function loadJobs() {
-    setLoading(true);
+  async function loadJobs(showRefreshing = false) {
+    if (showRefreshing) setRefreshing(true);
+    else setLoading(true);
     try {
       const { data, error } = await supabase
         .from('skip_jobs')
@@ -29,12 +32,18 @@ export default function SkipJobsListPage() {
 
       if (error) throw error;
       setJobs(data || []);
+      setLastSync(new Date());
     } catch (err) {
       console.error('Error loading jobs:', err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }
+
+  const handleRefresh = () => {
+    loadJobs(true);
+  };
 
   const filteredJobs = filter === 'all' 
     ? jobs 
@@ -119,7 +128,7 @@ export default function SkipJobsListPage() {
     <div className="min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4 pb-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-4">
             <Image
               src="/imr-logo.png"
@@ -130,13 +139,38 @@ export default function SkipJobsListPage() {
             />
             <h1 className="text-2xl font-bold text-white">Skip Jobs</h1>
           </div>
-          <a
-            href="/office/skips/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700"
-          >
-            + New Job
-          </a>
+          <div className="flex items-center gap-3">
+            {/* Refresh button */}
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="p-2 bg-blue-600/80 hover:bg-blue-600 text-white rounded-lg disabled:opacity-50 transition-colors"
+              title="Refresh jobs"
+            >
+              <svg 
+                className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+            <a
+              href="/office/skips/new"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700"
+            >
+              + New Job
+            </a>
+          </div>
         </div>
+
+        {/* Last sync indicator */}
+        {lastSync && (
+          <div className="text-xs text-gray-400 mb-4">
+            Last sync: {lastSync.toLocaleTimeString('en-IE')}
+          </div>
+        )}
 
         {/* Today's summary */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
