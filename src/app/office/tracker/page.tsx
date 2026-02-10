@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { SkipJobCompletion, SKIP_SIZES } from '@/lib/types';
+import { SKIP_SIZES } from '@/lib/types';
 import OfficeBottomNav from '@/components/OfficeBottomNav';
 
 interface SkipLocation {
@@ -49,8 +48,8 @@ export default function SkipTrackerPage() {
 
       const skipLocations: SkipLocation[] = [];
       
-      (data || []).forEach((completion: any) => {
-        const job = completion.skip_job;
+      (data || []).forEach((completion) => {
+        const job = completion.skip_job as any;
         
         // If action includes drop, skip is on site
         if (completion.action === 'drop' || completion.action === 'pick_drop') {
