@@ -150,7 +150,7 @@ export async function generateDocketPdf(data: PdfData): Promise<Uint8Array> {
     });
   }
 
-  if (completion.drop_lat && completion.drop_lng) {
+  if (job.customer?.address) {
     yPos -= 20;
     page.drawText('Drop Location (Site):', {
       x: margin,
@@ -160,23 +160,12 @@ export async function generateDocketPdf(data: PdfData): Promise<Uint8Array> {
       color: rgb(0.3, 0.3, 0.3),
     });
     yPos -= 18;
-    if (job.customer?.address) {
-      page.drawText(`Address: ${job.customer.address}`, {
-        x: margin,
-        y: yPos,
-        size: 10,
-        font: helvetica,
-        color: rgb(0.2, 0.2, 0.2),
-      });
-      yPos -= 16;
-    }
-    const dropText = `GPS: ${completion.drop_lat.toFixed(6)}, ${completion.drop_lng.toFixed(6)}`;
-    page.drawText(dropText, {
+    page.drawText(job.customer.address, {
       x: margin,
       y: yPos,
       size: 10,
       font: helvetica,
-      color: rgb(0.1, 0.1, 0.1),
+      color: rgb(0.2, 0.2, 0.2),
     });
   }
 

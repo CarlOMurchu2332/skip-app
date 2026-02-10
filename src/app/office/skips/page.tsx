@@ -5,11 +5,13 @@ import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { SkipJob, STATUS_COLORS, JobStatus, SKIP_SIZES } from '@/lib/types';
 
+type TabType = 'active' | 'completed';
+
 export default function SkipJobsListPage() {
   const [jobs, setJobs] = useState<SkipJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState<JobStatus | 'all'>('all');
+  const [activeTab, setActiveTab] = useState<TabType>('active');
   const [lastSync, setLastSync] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -45,9 +47,9 @@ export default function SkipJobsListPage() {
     loadJobs(true);
   };
 
-  const filteredJobs = filter === 'all' 
-    ? jobs 
-    : jobs.filter(j => j.status === filter);
+  const filteredJobs = activeTab === 'active'
+    ? jobs.filter(j => j.status !== 'completed')
+    : jobs.filter(j => j.status === 'completed');
 
   const todayJobs = jobs.filter(j => {
     const today = new Date().toISOString().split('T')[0];
@@ -191,21 +193,36 @@ export default function SkipJobsListPage() {
           </div>
         </div>
 
-        {/* Filter */}
-        <div className="mb-4 flex gap-2">
-          {(['all', 'created', 'sent', 'completed', 'cancelled'] as const).map(status => (
+        {/* Tabs */}
+        <div className="mb-4">
+          <div className="flex gap-1 bg-gray-800/50 rounded-xl p-1 border border-gray-700/50">
             <button
-              key={status}
-              onClick={() => setFilter(status)}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                filter === status
+              onClick={() => setActiveTab('active')}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'active'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  : 'text-gray-300 hover:bg-gray-600'
               }`}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              Active Jobs
+              <span className="ml-1 text-xs opacity-70">
+                ({jobs.filter(j => j.status !== 'completed').length})
+              </span>
             </button>
-          ))}
+            <button
+              onClick={() => setActiveTab('completed')}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === 'completed'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              Completed
+              <span className="ml-1 text-xs opacity-70">
+                ({jobs.filter(j => j.status === 'completed').length})
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Jobs list */}
