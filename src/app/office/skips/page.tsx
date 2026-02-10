@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { SkipJob, STATUS_COLORS, SKIP_SIZES } from '@/lib/types';
+import OfficeBottomNav from '@/components/OfficeBottomNav';
 
 type TabType = 'active' | 'completed';
 
@@ -387,6 +388,9 @@ export default function SkipJobsListPage() {
           )}
         </div>
       </div>
+      
+      {/* Bottom Navigation */}
+      <OfficeBottomNav />
     </div>
   );
 }
