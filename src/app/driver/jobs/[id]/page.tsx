@@ -19,20 +19,16 @@ export default function DriverJobDetailPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [pendingSync, setPendingSync] = useState(false);
 
   // Completion flow state
   const [step, setStep] = useState<Step>('details');
   const [skipSize, setSkipSize] = useState<SkipSize | null>(null);
   const [truckType, setTruckType] = useState<TruckType | null>(null);
   const [action, setAction] = useState<SkipAction | null>(null);
-  const [pickSize, setPickSize] = useState<SkipSize | null>(null);
-  const [dropSize, setDropSize] = useState<SkipSize | null>(null);
   const [customerSignature, setCustomerSignature] = useState('');
   
   // GPS state
   const [gpsStatus, setGpsStatus] = useState<'pending' | 'captured' | 'denied' | 'error'>('pending');
-  const [location, setLocation] = useState<{ lat: number; lng: number; accuracy: number } | null>(null);
 
   useEffect(() => {
     async function loadJob() {
@@ -79,39 +75,6 @@ export default function DriverJobDetailPage() {
     if (jobId) loadJob();
   }, [jobId]);
 
-  // Request GPS when reaching complete step
-  useEffect(() => {
-    if (step === 'complete' && gpsStatus === 'pending') {
-      requestLocation();
-    }
-  }, [step, gpsStatus]);
-
-  const requestLocation = () => {
-    if (!navigator.geolocation) {
-      setGpsStatus('error');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          accuracy: position.coords.accuracy,
-        });
-        setGpsStatus('captured');
-      },
-      (err) => {
-        console.log('GPS error:', err);
-        setGpsStatus('denied');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
-  };
 
   const handleStartJob = async () => {
     if (!job) return;
@@ -217,7 +180,6 @@ export default function DriverJobDetailPage() {
           {/* Status Banner */}
           <div className={`p-3 rounded-lg mb-4 text-center ${STATUS_COLORS[job?.status || 'created']}`}>
             <span className="font-bold">{STATUS_LABELS[job?.status || 'created']}</span>
-            {pendingSync && <span className="ml-2">⏳ Pending Sync</span>}
           </div>
 
           {/* Job Info Card */}
@@ -376,12 +338,7 @@ export default function DriverJobDetailPage() {
             {/* Complete Job Button - One unified action */}
             {(isInProgress || canStart) && (
               <button
-                onClick={() => {
-                  // Reset pick/drop sizes when entering complete
-                  setPickSize(null);
-                  setDropSize(null);
-                  setStep('complete');
-                }}
+                onClick={() => setStep('complete')}
                 className="w-full py-5 bg-green-600 hover:bg-green-700 rounded-xl text-xl font-bold flex items-center justify-center gap-2"
               >
                 <span>✅</span> Complete Job
