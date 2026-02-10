@@ -7,8 +7,9 @@ import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { SkipJob, SkipSize, SkipAction, TruckType, SKIP_SIZES, SKIP_ACTIONS, STATUS_COLORS, STATUS_LABELS, TRUCK_TYPES } from '@/lib/types';
 import BottomNav from '@/components/BottomNav';
+import Celebration from '@/components/Celebration';
 
-type Step = 'details' | 'start_config' | 'confirm' | 'success' | 'error';
+type Step = 'details' | 'complete' | 'success' | 'error';
 
 export default function DriverJobDetailPage() {
   const params = useParams();
@@ -79,9 +80,9 @@ export default function DriverJobDetailPage() {
     if (jobId) loadJob();
   }, [jobId]);
 
-  // Request GPS when reaching confirm step
+  // Request GPS when reaching complete step
   useEffect(() => {
-    if (step === 'confirm' && gpsStatus === 'pending') {
+    if (step === 'complete' && gpsStatus === 'pending') {
       requestLocation();
     }
   }, [step, gpsStatus]);
