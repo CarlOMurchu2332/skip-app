@@ -28,7 +28,6 @@ export default function DriverJobDetailPage() {
   const [action, setAction] = useState<SkipAction | null>(null);
   const [pickSize, setPickSize] = useState<SkipSize | null>(null);
   const [dropSize, setDropSize] = useState<SkipSize | null>(null);
-  const [notes, setNotes] = useState('');
   const [customerSignature, setCustomerSignature] = useState('');
   
   // GPS state
@@ -151,64 +150,6 @@ export default function DriverJobDetailPage() {
       ? `maps://maps.apple.com/?q=${encodedAddress}`
       : `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
     window.open(mapsUrl, '_blank');
-  };
-
-  const handleSubmitCompletion = async () => {
-    if (!action || !job) return;
-    if (action === 'pick_drop' && (!pickSize || !dropSize)) {
-      setError('Select removed and left-on-site sizes');
-      return;
-    }
-    if (action === 'pick' && !pickSize) {
-      setError('Select the removed skip size');
-      return;
-    }
-    if (action === 'drop' && !dropSize) {
-      setError('Select the left-on-site skip size');
-      return;
-    }
-
-    setSubmitting(true);
-    setError('');
-
-    try {
-      const res = await fetch('/api/skip-jobs/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: job.job_token,
-          skip_size: skipSize || undefined,
-          action,
-          pick_size: pickSize || undefined,
-          drop_size: dropSize || undefined,
-          lat: location?.lat,
-          lng: location?.lng,
-          accuracy_m: location?.accuracy,
-          driver_notes: notes || undefined,
-          customer_signature: customerSignature || undefined,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to complete job');
-      }
-
-      setStep('success');
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      // Check if offline - mark as pending sync
-      if (!navigator.onLine) {
-        setPendingSync(true);
-        setError('Saved locally - will sync when online');
-        // In a real implementation, we'd save to localStorage here
-      } else {
-        setError(errorMessage);
-      }
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   if (loading) {
@@ -576,4 +517,5 @@ export default function DriverJobDetailPage() {
     </div>
   );
 }
+
 

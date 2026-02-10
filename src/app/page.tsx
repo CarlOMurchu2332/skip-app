@@ -12,35 +12,35 @@ export default function HomePage() {
   const [userRole, setUserRole] = useState<'driver' | 'office' | null>(null);
 
   useEffect(() => {
-    checkAuth();
-  }, []);
+    async function checkAuth() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
 
-  async function checkAuth() {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
+        if (!session) {
+          router.push('/login');
+          return;
+        }
+
+        // Get user role
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (roleData) {
+          setUserRole(roleData.role as 'driver' | 'office');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
         router.push('/login');
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      // Get user role
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .single();
-
-      if (roleData) {
-        setUserRole(roleData.role as 'driver' | 'office');
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      router.push('/login');
-    } finally {
-      setLoading(false);
     }
-  }
+
+    checkAuth();
+  }, [router]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
