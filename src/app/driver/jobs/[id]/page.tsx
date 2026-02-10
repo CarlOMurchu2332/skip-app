@@ -452,9 +452,33 @@ export default function DriverJobDetailPage() {
                 setError('Please select skip size, truck type, and action');
                 return;
               }
-              await handleStartJob();
-              if (!error) {
-                setStep('details');
+              
+              setSubmitting(true);
+              setError('');
+              
+              try {
+                // First update the job with selected values
+                const { error: updateError } = await supabase
+                  .from('skip_jobs')
+                  .update({
+                    skip_size: skipSize,
+                    truck_type: truckType,
+                    office_action: action
+                  })
+                  .eq('id', job!.id);
+
+                if (updateError) throw new Error('Failed to update job details');
+
+                // Then start the job
+                await handleStartJob();
+                
+                if (!error) {
+                  setStep('details');
+                }
+              } catch (err: unknown) {
+                const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+                setError(errorMessage);
+                setSubmitting(false);
               }
             }}
             disabled={submitting || !skipSize || !truckType || !action}
