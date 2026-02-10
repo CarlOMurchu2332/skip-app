@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { SkipJob, SkipSize, SkipAction, TruckType, SKIP_SIZES, SKIP_ACTIONS, STATUS_COLORS, STATUS_LABELS, TRUCK_TYPES } from '@/lib/types';
 import BottomNav from '@/components/BottomNav';
 
-type Step = 'details' | 'start_config' | 'size' | 'action' | 'confirm' | 'success' | 'error';
+type Step = 'details' | 'start_config' | 'confirm' | 'success' | 'error';
 
 export default function DriverJobDetailPage() {
   const params = useParams();
@@ -150,18 +150,6 @@ export default function DriverJobDetailPage() {
       ? `maps://maps.apple.com/?q=${encodedAddress}`
       : `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
     window.open(mapsUrl, '_blank');
-  };
-
-  const handleSelectSize = (size: SkipSize) => {
-    setSkipSize(size);
-    setStep('action');
-  };
-
-  const handleSelectAction = (selectedAction: SkipAction) => {
-    setAction(selectedAction);
-    setPickSize(null);
-    setDropSize(null);
-    setStep('confirm');
   };
 
   const handleSubmitCompletion = async () => {
@@ -470,7 +458,12 @@ export default function DriverJobDetailPage() {
             {/* Complete Job Button */}
             {(isInProgress || canStart) && (
               <button
-                onClick={() => setStep('size')}
+                onClick={() => {
+                  // Reset pick/drop sizes when entering confirm
+                  setPickSize(null);
+                  setDropSize(null);
+                  setStep('confirm');
+                }}
                 className="w-full py-5 bg-green-600 hover:bg-green-700 rounded-xl text-xl font-bold flex items-center justify-center gap-2"
               >
                 <span>✅</span> Complete Job
@@ -600,8 +593,8 @@ export default function DriverJobDetailPage() {
         </div>
       )}
 
-      {/* Step: Select Skip Size */}
-      {step === 'size' && (
+      {/* Step: Confirm */}
+      {step === 'confirm' && (
         <div className="p-4">
           <div className="mb-4">
             <button
@@ -612,78 +605,6 @@ export default function DriverJobDetailPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back to Details
-            </button>
-          </div>
-          
-          <h2 className="text-xl font-semibold mb-4 text-center">Select Skip Size</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {SKIP_SIZES.map((size) => (
-              <button
-                key={size.value}
-                onClick={() => handleSelectSize(size.value)}
-                className="py-6 px-4 bg-blue-600 hover:bg-blue-700 rounded-xl text-2xl font-bold transition-colors active:scale-95"
-              >
-                {size.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Step: Select Action */}
-      {step === 'action' && (
-        <div className="p-4">
-          <div className="mb-4">
-            <button
-              onClick={() => setStep('size')}
-              className="text-blue-400 text-sm flex items-center gap-1"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back
-            </button>
-          </div>
-          
-          <div className="bg-gray-600/40 rounded-lg p-3 mb-4 border border-gray-500/40">
-            <span className="text-gray-400">Skip Size:</span>{' '}
-            <span className="font-bold">{SKIP_SIZES.find(s => s.value === skipSize)?.label}</span>
-          </div>
-          
-          <h2 className="text-xl font-semibold mb-4 text-center">Select Action</h2>
-          <div className="space-y-3">
-            {SKIP_ACTIONS.map((act) => (
-              <button
-                key={act.value}
-                onClick={() => handleSelectAction(act.value)}
-                className={`w-full py-5 px-4 rounded-xl text-xl font-bold transition-colors active:scale-95 ${
-                  job?.office_action === act.value 
-                    ? 'bg-yellow-600 hover:bg-yellow-700 ring-2 ring-yellow-400' 
-                    : 'bg-green-600 hover:bg-green-700'
-                }`}
-              >
-                {act.label}
-                {job?.office_action === act.value && (
-                  <span className="ml-2 text-sm">(Requested)</span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Step: Confirm */}
-      {step === 'confirm' && (
-        <div className="p-4">
-          <div className="mb-4">
-            <button
-              onClick={() => setStep('action')}
-              className="text-blue-400 text-sm flex items-center gap-1"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back
             </button>
           </div>
 
