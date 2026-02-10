@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+// Force fresh deployment
 export default function HomePage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
