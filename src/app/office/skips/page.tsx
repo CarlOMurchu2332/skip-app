@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
-import { SkipJob, STATUS_COLORS, JobStatus, SKIP_SIZES } from '@/lib/types';
+import { SkipJob, STATUS_COLORS, SKIP_SIZES } from '@/lib/types';
 
 type TabType = 'active' | 'completed';
 
