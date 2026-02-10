@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase';
 import nodemailer from 'nodemailer';
 import { generateDocketPdf } from '@/lib/pdf';
 import { CompleteJobRequest, SKIP_SIZES, SKIP_ACTIONS } from '@/lib/types';
+import { recordStatusChange } from '@/lib/status-history';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update job status
+    const oldStatus = job.status;
     const { error: updateError } = await supabase
       .from('skip_jobs')
       .update({
@@ -91,8 +93,10 @@ export async function POST(request: NextRequest) {
       .eq('id', job.id);
 
     if (updateError) {
-      console.error('Job update error:', updateError);
+      console.error('[complete] Job update error:', updateError);
     }
+
+    await recordStatusChange(supabase, job.id, oldStatus, 'completed', 'driver');
 
     // Generate PDF
     const pdfBytes = await generateDocketPdf({
