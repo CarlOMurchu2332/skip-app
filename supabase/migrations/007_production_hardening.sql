@@ -4,12 +4,10 @@
 -- ============================================
 
 -- 1) AUDIT FIELDS
--- Add updated_at to core tables
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 ALTER TABLE drivers   ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 ALTER TABLE skip_jobs ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
--- Add soft-delete support
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ DEFAULT NULL;
 ALTER TABLE skip_jobs ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ DEFAULT NULL;
 
@@ -37,50 +35,57 @@ CREATE TRIGGER trg_skip_jobs_updated
   BEFORE UPDATE ON skip_jobs
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
--- 3) ROW LEVEL SECURITY (baseline)
--- Enable RLS on all tables
+-- 3) ROW LEVEL SECURITY
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE drivers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE skip_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE skip_job_completion ENABLE ROW LEVEL SECURITY;
 
--- Service role has full access (API routes use this)
-CREATE POLICY IF NOT EXISTS "service_role_all_customers"
+-- Drop existing policies first (safe to run if they don't exist)
+DROP POLICY IF EXISTS "service_role_all_customers" ON customers;
+DROP POLICY IF EXISTS "service_role_all_drivers" ON drivers;
+DROP POLICY IF EXISTS "service_role_all_skip_jobs" ON skip_jobs;
+DROP POLICY IF EXISTS "service_role_all_completions" ON skip_job_completion;
+DROP POLICY IF EXISTS "anon_read_customers" ON customers;
+DROP POLICY IF EXISTS "anon_read_drivers" ON drivers;
+DROP POLICY IF EXISTS "anon_read_skip_jobs" ON skip_jobs;
+DROP POLICY IF EXISTS "anon_read_completions" ON skip_job_completion;
+
+-- Service role full access
+CREATE POLICY "service_role_all_customers"
   ON customers FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
 
-CREATE POLICY IF NOT EXISTS "service_role_all_drivers"
+CREATE POLICY "service_role_all_drivers"
   ON drivers FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
 
-CREATE POLICY IF NOT EXISTS "service_role_all_skip_jobs"
+CREATE POLICY "service_role_all_skip_jobs"
   ON skip_jobs FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
 
-CREATE POLICY IF NOT EXISTS "service_role_all_completions"
+CREATE POLICY "service_role_all_completions"
   ON skip_job_completion FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
 
--- Anon role: read-only on drivers + customers (for client-side dropdowns)
-CREATE POLICY IF NOT EXISTS "anon_read_customers"
+-- Anon role read-only
+CREATE POLICY "anon_read_customers"
   ON customers FOR SELECT
   USING (auth.role() = 'anon');
 
-CREATE POLICY IF NOT EXISTS "anon_read_drivers"
+CREATE POLICY "anon_read_drivers"
   ON drivers FOR SELECT
   USING (auth.role() = 'anon');
 
--- Anon role: read-only on skip_jobs (for driver portal to fetch job by token)
-CREATE POLICY IF NOT EXISTS "anon_read_skip_jobs"
+CREATE POLICY "anon_read_skip_jobs"
   ON skip_jobs FOR SELECT
   USING (auth.role() = 'anon');
 
--- Anon role: read skip_job_completion (for driver view)
-CREATE POLICY IF NOT EXISTS "anon_read_completions"
+CREATE POLICY "anon_read_completions"
   ON skip_job_completion FOR SELECT
   USING (auth.role() = 'anon');
 
@@ -91,7 +96,7 @@ CREATE INDEX IF NOT EXISTS idx_skip_jobs_deleted_at ON skip_jobs(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_skip_jobs_completed_at ON skip_jobs(completed_at);
 CREATE INDEX IF NOT EXISTS idx_skip_job_completion_skip_job_id ON skip_job_completion(skip_job_id);
 
--- 5) STATUS HISTORY TABLE (who changed what, when)
+-- 5) STATUS HISTORY TABLE
 CREATE TABLE IF NOT EXISTS skip_job_status_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   skip_job_id UUID NOT NULL REFERENCES skip_jobs(id) ON DELETE CASCADE,
@@ -105,11 +110,13 @@ CREATE INDEX IF NOT EXISTS idx_status_history_job ON skip_job_status_history(ski
 
 ALTER TABLE skip_job_status_history ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "service_role_all_status_history"
+DROP POLICY IF EXISTS "service_role_all_status_history" ON skip_job_status_history;
+CREATE POLICY "service_role_all_status_history"
   ON skip_job_status_history FOR ALL
   USING (auth.role() = 'service_role')
   WITH CHECK (auth.role() = 'service_role');
 
-CREATE POLICY IF NOT EXISTS "anon_read_status_history"
+DROP POLICY IF EXISTS "anon_read_status_history" ON skip_job_status_history;
+CREATE POLICY "anon_read_status_history"
   ON skip_job_status_history FOR SELECT
   USING (auth.role() = 'anon');
