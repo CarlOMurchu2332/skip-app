@@ -19,7 +19,6 @@ export default function NewSkipJobPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [driverId, setDriverId] = useState('');
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
-  const [truckReg, setTruckReg] = useState('');
   const [jobDate, setJobDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
   const [officeAction, setOfficeAction] = useState<SkipAction | ''>('');
@@ -129,46 +128,6 @@ export default function NewSkipJobPage() {
     setJobDate(tomorrow.toISOString().split('T')[0]);
   };
 
-  const normalizeTruckReg = (value: string) => {
-    return value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  };
-
-  const formatTruckRegDisplay = (value: string) => {
-    // Remove all non-alphanumeric
-    const clean = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    
-    // Irish format: max 3 digits, then max 2 letters, then max 8 digits
-    // e.g. 242-MH-12345678
-    let digits1 = '';
-    let letters = '';
-    let digits2 = '';
-    let pos = 0;
-    
-    // Extract first part: up to 3 digits
-    while (pos < clean.length && digits1.length < 3 && /[0-9]/.test(clean[pos])) {
-      digits1 += clean[pos];
-      pos++;
-    }
-    
-    // Extract middle part: up to 2 letters
-    while (pos < clean.length && letters.length < 2 && /[A-Z]/.test(clean[pos])) {
-      letters += clean[pos];
-      pos++;
-    }
-    
-    // Extract last part: up to 8 digits
-    while (pos < clean.length && digits2.length < 8 && /[0-9]/.test(clean[pos])) {
-      digits2 += clean[pos];
-      pos++;
-    }
-    
-    // Build formatted string
-    let result = digits1;
-    if (letters) result += '-' + letters;
-    if (digits2) result += '-' + digits2;
-    
-    return result;
-  };
 
   const handleSaveNewCustomer = async () => {
     if (!newCustomer.name.trim()) {
@@ -250,7 +209,7 @@ export default function NewSkipJobPage() {
     }
   };
 
-  const isFormValid = customerId && driverId && truckReg && jobDate;
+  const isFormValid = customerId && driverId && jobDate;
   const driverHasPhone = selectedDriver?.phone;
 
   const handleSubmit = async (sendToDriver: boolean) => {
@@ -275,7 +234,6 @@ export default function NewSkipJobPage() {
         body: JSON.stringify({
           customer_id: customerId,
           driver_id: driverId,
-          truck_reg: normalizeTruckReg(truckReg),
           job_date: jobDate,
           notes,
           office_action: officeAction || null,
@@ -587,20 +545,6 @@ export default function NewSkipJobPage() {
               )}
             </div>
 
-            {/* Truck Reg */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Truck Reg *
-              </label>
-              <input
-                type="text"
-                value={truckReg}
-                onChange={(e) => setTruckReg(formatTruckRegDisplay(e.target.value))}
-                placeholder="e.g. 242-MH-1572"
-                className="w-full px-3 py-2.5 bg-gray-500/40 border border-gray-400/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
-              />
-              <p className="mt-1 text-xs text-gray-500">Format: 242-MH-1572 or 242 MH 1572</p>
-            </div>
 
             {/* Notes */}
             <div>

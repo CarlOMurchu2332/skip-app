@@ -339,13 +339,17 @@ export default function DriverJobDetailPage() {
               </button>
             )}
 
-            {/* Complete Job Button - One unified action */}
+            {/* Start/Complete Job Button */}
             {(isInProgress || canStart) && (
               <button
                 onClick={() => setStep('complete')}
                 className="w-full py-5 bg-green-600 hover:bg-green-700 rounded-xl text-xl font-bold flex items-center justify-center gap-2"
               >
-                <span>✅</span> Complete Job
+                {isInProgress ? (
+                  <><span>✅</span> Complete Job</>
+                ) : (
+                  <><span>▶️</span> Start Job</>
+                )}
               </button>
             )}
           </div>
@@ -559,12 +563,18 @@ export default function DriverJobDetailPage() {
 
                 if (updateError) throw new Error('Failed to update job details');
 
-                // Then start the job
-                await handleStartJob();
+                // Only call start if job is not already in progress
+                if (job!.status !== 'in_progress') {
+                  await handleStartJob();
+                }
                 
                 if (!error) {
-                  // Refresh job data to show updated truck reg
-                  setJob(prev => prev ? { ...prev, truck_reg: truckReg.trim() } : null);
+                  // Refresh job data to show updated truck reg and status
+                  setJob(prev => prev ? { 
+                    ...prev, 
+                    truck_reg: truckReg.trim(),
+                    status: 'in_progress'
+                  } : null);
                   setStep('details');
                 }
               } catch (err: unknown) {
@@ -576,7 +586,7 @@ export default function DriverJobDetailPage() {
             disabled={submitting || !skipSize || !truckType || !action || !truckReg.trim()}
             className="w-full py-5 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 rounded-xl text-xl font-bold transition-colors active:scale-95"
           >
-            {submitting ? 'Starting...' : '▶️ Confirm & Start Job'}
+            {submitting ? (job?.status === 'in_progress' ? 'Saving...' : 'Starting...') : (job?.status === 'in_progress' ? '✅ Save & Continue' : '▶️ Confirm & Start Job')}
           </button>
         </div>
       )}

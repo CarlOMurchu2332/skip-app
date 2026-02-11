@@ -23,7 +23,6 @@ export default function EditSkipJobPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [driverId, setDriverId] = useState('');
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
-  const [truckReg, setTruckReg] = useState('');
   const [jobDate, setJobDate] = useState('');
   const [notes, setNotes] = useState('');
   const [officeAction, setOfficeAction] = useState<SkipAction | ''>('');
@@ -69,7 +68,6 @@ export default function EditSkipJobPage() {
             setDriverId(j.driver_id);
             setSelectedDriver(j.driver || null);
           }
-          setTruckReg(formatTruckRegDisplay(j.truck_reg || ''));
           setJobDate(j.job_date || '');
           setNotes(j.notes || '');
           setOfficeAction(j.office_action || '');
@@ -122,38 +120,7 @@ export default function EditSkipJobPage() {
     setSelectedDriver(driver);
   };
 
-  const normalizeTruckReg = (value: string) => {
-    return value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  };
-
-  const formatTruckRegDisplay = (value: string) => {
-    const clean = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    let digits1 = '';
-    let letters = '';
-    let digits2 = '';
-    let pos = 0;
-    
-    while (pos < clean.length && digits1.length < 3 && /[0-9]/.test(clean[pos])) {
-      digits1 += clean[pos];
-      pos++;
-    }
-    while (pos < clean.length && letters.length < 2 && /[A-Z]/.test(clean[pos])) {
-      letters += clean[pos];
-      pos++;
-    }
-    while (pos < clean.length && digits2.length < 8 && /[0-9]/.test(clean[pos])) {
-      digits2 += clean[pos];
-      pos++;
-    }
-    
-    let result = digits1;
-    if (letters) result += '-' + letters;
-    if (digits2) result += '-' + digits2;
-    
-    return result;
-  };
-
-  const isFormValid = customerId && driverId && truckReg && jobDate;
+  const isFormValid = customerId && driverId && jobDate;
 
   const handleSubmit = async () => {
     if (!isFormValid) {
@@ -172,7 +139,6 @@ export default function EditSkipJobPage() {
           job_id: jobId,
           customer_id: customerId,
           driver_id: driverId,
-          truck_reg: normalizeTruckReg(truckReg),
           job_date: jobDate,
           notes: notes || null,
           office_action: officeAction || null,
@@ -444,19 +410,6 @@ export default function EditSkipJobPage() {
               )}
             </div>
 
-            {/* Truck Reg */}
-            <div>
-              <label className="block text-sm font-medium text-gray-200 mb-1">
-                Truck Reg *
-              </label>
-              <input
-                type="text"
-                value={truckReg}
-                onChange={(e) => setTruckReg(formatTruckRegDisplay(e.target.value))}
-                placeholder="e.g. 242-MH-1572"
-                className="w-full px-3 py-2.5 bg-gray-500/40 border border-gray-400/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
-              />
-            </div>
 
             {/* Notes */}
             <div>
