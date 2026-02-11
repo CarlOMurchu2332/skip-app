@@ -339,17 +339,85 @@ export default function DriverJobDetailPage() {
               </button>
             )}
 
-            {/* Start/Complete Job Button */}
-            {(isInProgress || canStart) && (
+            {/* Start Job Button (for new jobs) */}
+            {canStart && (
               <button
                 onClick={() => setStep('complete')}
-                className="w-full py-5 bg-green-600 hover:bg-green-700 rounded-xl text-xl font-bold flex items-center justify-center gap-2"
+                className="w-full py-5 bg-yellow-600 hover:bg-yellow-700 rounded-xl text-xl font-bold flex items-center justify-center gap-2"
               >
-                {isInProgress ? (
-                  <><span>✅</span> Complete Job</>
-                ) : (
-                  <><span>▶️</span> Start Job</>
-                )}
+                <span>▶️</span> Start Job
+              </button>
+            )}
+
+            {/* Complete Job Button (for in-progress jobs) */}
+            {isInProgress && (
+              <button
+                onClick={async () => {
+                  if (!customerSignature.trim()) {
+                    setError('Please enter customer signature name');
+                    return;
+                  }
+
+                  setSubmitting(true);
+                  setError('');
+
+                  try {
+                    // Get GPS location
+                    let lat: number | null = null;
+                    let lng: number | null = null;
+                    let accuracy_m: number | null = null;
+
+                    if (navigator.geolocation) {
+                      try {
+                        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                          navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                          });
+                        });
+                        lat = position.coords.latitude;
+                        lng = position.coords.longitude;
+                        accuracy_m = position.coords.accuracy;
+                      } catch (geoError) {
+                        console.warn('GPS not available:', geoError);
+                      }
+                    }
+
+                    // Call complete API
+                    const res = await fetch('/api/skip-jobs/complete', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        token: job?.job_token,
+                        skip_size: job?.skip_size,
+                        action: job?.office_action,
+                        customer_signature: customerSignature.trim(),
+                        lat,
+                        lng,
+                        accuracy_m,
+                        driver_notes: ''
+                      }),
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                      throw new Error(data.error || 'Failed to complete job');
+                    }
+
+                    // Success! Show celebration
+                    setStep('success');
+                  } catch (err: unknown) {
+                    const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+                    setError(errorMessage);
+                    setSubmitting(false);
+                  }
+                }}
+                disabled={submitting || !customerSignature.trim()}
+                className="w-full py-5 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 rounded-xl text-xl font-bold flex items-center justify-center gap-2"
+              >
+                {submitting ? 'Completing...' : <><span>✅</span> Complete Job</>}
               </button>
             )}
           </div>
