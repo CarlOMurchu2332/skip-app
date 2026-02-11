@@ -642,13 +642,15 @@ export default function DriverJobDetailPage() {
                   await handleStartJob();
                 }
                 
-                // Success - refresh job data and go back to details
+                // Success - refresh job data and go back to details (include pick/drop sizes!)
                 setJob(prev => prev ? { 
                   ...prev, 
                   truck_reg: truckReg.trim(),
                   skip_size: skipSize,
                   truck_type: truckType,
                   office_action: action,
+                  pick_size: pickSize || undefined,
+                  drop_size: dropSize || undefined,
                   status: 'in_progress'
                 } : null);
                 setSubmitting(false);
