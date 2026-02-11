@@ -25,6 +25,9 @@ export default function DriverJobDetailPage() {
   const [skipSize, setSkipSize] = useState<SkipSize | null>(null);
   const [truckType, setTruckType] = useState<TruckType | null>(null);
   const [action, setAction] = useState<SkipAction | null>(null);
+  const [pickSize, setPickSize] = useState<SkipSize | null>(null);
+  const [dropSize, setDropSize] = useState<SkipSize | null>(null);
+  const [truckReg, setTruckReg] = useState('');
   const [customerSignature, setCustomerSignature] = useState('');
 
   useEffect(() => {
@@ -59,6 +62,10 @@ export default function DriverJobDetailPage() {
         }
         if (jobData.truck_type) {
           setTruckType(jobData.truck_type);
+        }
+        // Pre-fill truck reg if available
+        if (jobData.truck_reg) {
+          setTruckReg(jobData.truck_reg);
         }
       } catch (err) {
         console.error('Error loading job:', err);
@@ -409,7 +416,12 @@ export default function DriverJobDetailPage() {
               {SKIP_ACTIONS.map((act) => (
                 <button
                   key={act.value}
-                  onClick={() => setAction(act.value)}
+                  onClick={() => {
+                    setAction(act.value);
+                    // Reset pick/drop sizes when action changes
+                    setPickSize(null);
+                    setDropSize(null);
+                  }}
                   className={`w-full py-4 px-4 rounded-lg text-lg font-bold transition-colors ${
                     action === act.value
                       ? 'bg-blue-600 text-white ring-2 ring-blue-400'
@@ -425,6 +437,68 @@ export default function DriverJobDetailPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Pick Size (for pick or pick_drop actions) */}
+          {(action === 'pick' || action === 'pick_drop') && (
+            <div className="mb-6">
+              <label className="block text-sm text-gray-400 mb-2">
+                {action === 'pick_drop' ? 'Removed Skip Size *' : 'Pick Up Skip Size *'}
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {SKIP_SIZES.map((size) => (
+                  <button
+                    key={size.value}
+                    onClick={() => setPickSize(size.value)}
+                    className={`py-3 px-2 rounded-lg text-lg font-bold transition-colors ${
+                      pickSize === size.value
+                        ? 'bg-red-600 text-white ring-2 ring-red-400'
+                        : 'bg-gray-500/60 text-gray-100 hover:bg-gray-500'
+                    }`}
+                  >
+                    {size.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Drop Size (for drop or pick_drop actions) */}
+          {(action === 'drop' || action === 'pick_drop') && (
+            <div className="mb-6">
+              <label className="block text-sm text-gray-400 mb-2">
+                {action === 'pick_drop' ? 'Left on Site Skip Size *' : 'Drop Off Skip Size *'}
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {SKIP_SIZES.map((size) => (
+                  <button
+                    key={size.value}
+                    onClick={() => setDropSize(size.value)}
+                    className={`py-3 px-2 rounded-lg text-lg font-bold transition-colors ${
+                      dropSize === size.value
+                        ? 'bg-green-600 text-white ring-2 ring-green-400'
+                        : 'bg-gray-500/60 text-gray-100 hover:bg-gray-500'
+                    }`}
+                  >
+                    {size.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Truck Reg Input - Mandatory */}
+          <div className="mb-4">
+            <label className="block text-sm text-gray-400 mb-1">
+              Truck Registration * (Required)
+            </label>
+            <input
+              value={truckReg}
+              onChange={(e) => setTruckReg(e.target.value.toUpperCase())}
+              className="w-full px-3 py-2 bg-gray-500/40 border border-gray-500/50 rounded-lg text-white font-mono uppercase focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. 242-MH-1572"
+              maxLength={20}
+            />
           </div>
 
           <div className="mb-4">
@@ -448,8 +522,23 @@ export default function DriverJobDetailPage() {
           {/* Start Job Button */}
           <button
             onClick={async () => {
-              if (!skipSize || !truckType || !action) {
-                setError('Please select skip size, truck type, and action');
+              // Validation
+              if (!skipSize || !truckType || !action || !truckReg.trim()) {
+                setError('Please fill in all required fields: skip size, truck type, action, and truck reg');
+                return;
+              }
+
+              // Validate pick/drop sizes based on action
+              if (action === 'pick' && !pickSize) {
+                setError('Please select the skip size to pick up');
+                return;
+              }
+              if (action === 'drop' && !dropSize) {
+                setError('Please select the skip size to drop off');
+                return;
+              }
+              if (action === 'pick_drop' && (!pickSize || !dropSize)) {
+                setError('Please select both removed skip size and left on site skip size');
                 return;
               }
               
@@ -457,13 +546,14 @@ export default function DriverJobDetailPage() {
               setError('');
               
               try {
-                // First update the job with selected values
+                // First update the job with ALL selected values including truck reg
                 const { error: updateError } = await supabase
                   .from('skip_jobs')
                   .update({
                     skip_size: skipSize,
                     truck_type: truckType,
-                    office_action: action
+                    office_action: action,
+                    truck_reg: truckReg.trim()
                   })
                   .eq('id', job!.id);
 
@@ -473,6 +563,8 @@ export default function DriverJobDetailPage() {
                 await handleStartJob();
                 
                 if (!error) {
+                  // Refresh job data to show updated truck reg
+                  setJob(prev => prev ? { ...prev, truck_reg: truckReg.trim() } : null);
                   setStep('details');
                 }
               } catch (err: unknown) {
@@ -481,7 +573,7 @@ export default function DriverJobDetailPage() {
                 setSubmitting(false);
               }
             }}
-            disabled={submitting || !skipSize || !truckType || !action}
+            disabled={submitting || !skipSize || !truckType || !action || !truckReg.trim()}
             className="w-full py-5 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 rounded-xl text-xl font-bold transition-colors active:scale-95"
           >
             {submitting ? 'Starting...' : '▶️ Confirm & Start Job'}
