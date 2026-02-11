@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const updateData: Record<string, unknown> = {};
     if (customer_id !== undefined) updateData.customer_id = customer_id;
     if (driver_id !== undefined) updateData.driver_id = driver_id;
-    if (truck_reg !== undefined) updateData.truck_reg = truck_reg.trim();
+    if (truck_reg !== undefined) updateData.truck_reg = truck_reg?.trim() || null;
     if (job_date !== undefined) updateData.job_date = job_date;
     if (notes !== undefined) updateData.notes = notes?.trim() || null;
     if (office_action !== undefined) updateData.office_action = office_action || null;

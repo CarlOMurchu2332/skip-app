@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
     const v = new ValidationErrors();
     v.requireUUID('customer_id', customer_id);
     v.requireUUID('driver_id', driver_id);
-    v.requireNonEmpty('truck_reg', truck_reg);
     v.requireDate('job_date', job_date);
     v.optionalAction('office_action', office_action);
     v.optionalSkipSize('skip_size', skip_size);
@@ -50,7 +49,7 @@ export async function POST(request: NextRequest) {
       .insert({
         customer_id,
         driver_id,
-        truck_reg: truck_reg.trim(),
+        truck_reg: truck_reg?.trim() || null,
         job_date,
         docket_no,
         job_token,
