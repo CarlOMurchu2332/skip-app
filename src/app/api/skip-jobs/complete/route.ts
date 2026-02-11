@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Send email with Gmail SMTP (Nodemailer)
-    const emailTo = process.env.EMAIL_TO || 'carlmurphy2332@gmail.com';
+    const emailTo = process.env.EMAIL_TO || 'carlmurphy2332@gmail.com, conor@irishmetals.ie';
     const emailFrom = process.env.EMAIL_FROM || process.env.SMTP_USER || 'carlmurphy2332@gmail.com';
     const smtpHost = process.env.SMTP_HOST;
     const smtpPort = Number(process.env.SMTP_PORT || 465);
