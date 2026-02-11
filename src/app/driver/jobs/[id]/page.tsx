@@ -428,20 +428,22 @@ export default function DriverJobDetailPage() {
 
       {/* Step: Complete - Unified job completion on one page */}
       {step === 'complete' && (
-        <div className="p-4">
-          <div className="mb-4">
-            <button
-              onClick={() => setStep('details')}
-              className="text-blue-400 text-sm flex items-center gap-1"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Details
-            </button>
-          </div>
+        <div className="p-4 pb-24">
+          <div className="max-w-2xl mx-auto">
+            <div className="mb-4">
+              <button
+                onClick={() => setStep('details')}
+                className="text-blue-400 text-sm flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Details
+              </button>
+            </div>
 
-          <h2 className="text-xl font-semibold mb-4 text-center">Confirm Job Details</h2>
+            <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-gray-700/50">
+              <h2 className="text-xl font-semibold mb-6 text-center">Confirm Job Details</h2>
 
           {/* Skip Size Selection */}
           <div className="mb-6">
@@ -593,8 +595,8 @@ export default function DriverJobDetailPage() {
             </div>
           )}
 
-          {/* Start Job Button */}
-          <button
+              {/* Start Job Button */}
+              <button
             onClick={async () => {
               // Validation
               if (!skipSize || !truckType || !action || !truckReg.trim()) {
@@ -661,7 +663,9 @@ export default function DriverJobDetailPage() {
             className="w-full py-5 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 rounded-xl text-xl font-bold transition-colors active:scale-95"
           >
             {submitting ? (job?.status === 'in_progress' ? 'Saving...' : 'Starting...') : (job?.status === 'in_progress' ? '✅ Save & Continue' : '▶️ Confirm & Start Job')}
-          </button>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
