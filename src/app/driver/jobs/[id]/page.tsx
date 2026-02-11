@@ -384,7 +384,7 @@ export default function DriverJobDetailPage() {
                       }
                     }
 
-                    // Call complete API
+                    // Call complete API with pick/drop sizes from job
                     const res = await fetch('/api/skip-jobs/complete', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -392,6 +392,8 @@ export default function DriverJobDetailPage() {
                         token: job?.job_token,
                         skip_size: job?.skip_size,
                         action: job?.office_action,
+                        pick_size: (job as any)?.pick_size || null,
+                        drop_size: (job as any)?.drop_size || null,
                         customer_signature: customerSignature.trim(),
                         lat,
                         lng,
@@ -618,14 +620,16 @@ export default function DriverJobDetailPage() {
               setError('');
               
               try {
-                // First update the job with ALL selected values including truck reg
+                // First update the job with ALL selected values including truck reg and pick/drop sizes
                 const { error: updateError } = await supabase
                   .from('skip_jobs')
                   .update({
                     skip_size: skipSize,
                     truck_type: truckType,
                     office_action: action,
-                    truck_reg: truckReg.trim()
+                    truck_reg: truckReg.trim(),
+                    pick_size: pickSize,
+                    drop_size: dropSize
                   })
                   .eq('id', job!.id);
 

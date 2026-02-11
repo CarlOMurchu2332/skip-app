@@ -34,6 +34,8 @@ export interface SkipJob {
   office_action?: SkipAction;
   skip_size?: SkipSize;
   truck_type?: TruckType;
+  pick_size?: SkipSize;
+  drop_size?: SkipSize;
   sent_at?: string;
   started_at?: string;
   completed_at?: string;
