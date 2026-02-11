@@ -568,15 +568,17 @@ export default function DriverJobDetailPage() {
                   await handleStartJob();
                 }
                 
-                if (!error) {
-                  // Refresh job data to show updated truck reg and status
-                  setJob(prev => prev ? { 
-                    ...prev, 
-                    truck_reg: truckReg.trim(),
-                    status: 'in_progress'
-                  } : null);
-                  setStep('details');
-                }
+                // Success - refresh job data and go back to details
+                setJob(prev => prev ? { 
+                  ...prev, 
+                  truck_reg: truckReg.trim(),
+                  skip_size: skipSize,
+                  truck_type: truckType,
+                  office_action: action,
+                  status: 'in_progress'
+                } : null);
+                setSubmitting(false);
+                setStep('details');
               } catch (err: unknown) {
                 const errorMessage = err instanceof Error ? err.message : 'An error occurred';
                 setError(errorMessage);

@@ -16,6 +16,12 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Skip App - Irish Metals Dispatch",
   description: "Dispatch and driver completion system for skip hire operations",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({
