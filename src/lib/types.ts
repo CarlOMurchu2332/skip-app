@@ -122,9 +122,9 @@ export const SKIP_ACTIONS: { value: SkipAction; label: string }[] = [
 
 export type TruckType = 'chain_lift' | 'hook_loader';
 
-export const TRUCK_TYPES: { value: TruckType; label: string }[] = [
-  { value: 'chain_lift', label: 'Chain Lift' },
-  { value: 'hook_loader', label: 'Hook Loader' },
+export const TRUCK_TYPES: { value: TruckType; label: string; defaultReg: string }[] = [
+  { value: 'chain_lift', label: 'Chain Lift', defaultReg: '161-D-29755' },
+  { value: 'hook_loader', label: 'Hook Loader', defaultReg: '142-D-152679' },
 ];
 
 export const STATUS_COLORS: Record<JobStatus, string> = {

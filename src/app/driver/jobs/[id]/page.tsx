@@ -472,7 +472,11 @@ export default function DriverJobDetailPage() {
               {TRUCK_TYPES.map((truck) => (
                 <button
                   key={truck.value}
-                  onClick={() => setTruckType(truck.value)}
+                  onClick={() => {
+                    setTruckType(truck.value);
+                    // Auto-fill truck reg when truck type is selected
+                    setTruckReg(truck.defaultReg);
+                  }}
                   className={`py-4 px-4 rounded-lg text-lg font-bold transition-colors ${
                     truckType === truck.value
                       ? 'bg-orange-600 text-white ring-2 ring-orange-400'
