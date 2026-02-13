@@ -175,20 +175,20 @@ export default function SkipJobsListPage() {
           </div>
         )}
 
-        {/* Today's summary */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
-          <h2 className="text-lg font-semibold mb-2">Today’s Jobs</h2>
-          <div className="flex gap-4 text-sm">
-            <span className="px-3 py-1 bg-gray-100 rounded-full">
+        {/* Today's summary - Fixed contrast */}
+        <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-lg rounded-lg shadow-md p-4 mb-6 border border-gray-700/50">
+          <h2 className="text-lg font-semibold mb-3 text-white">Today's Jobs</h2>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <span className="px-3 py-1.5 bg-gray-700 text-white rounded-full font-medium">
               Total: {todayJobs.length}
             </span>
-            <span className="px-3 py-1 bg-gray-200 rounded-full">
+            <span className="px-3 py-1.5 bg-gray-600 text-gray-200 rounded-full font-medium">
               Created: {todayJobs.filter(j => j.status === 'created').length}
             </span>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
+            <span className="px-3 py-1.5 bg-blue-600 text-white rounded-full font-medium">
               Sent: {todayJobs.filter(j => j.status === 'sent').length}
             </span>
-            <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full">
+            <span className="px-3 py-1.5 bg-green-600 text-white rounded-full font-medium">
               Completed: {todayJobs.filter(j => j.status === 'completed').length}
             </span>
           </div>
@@ -226,10 +226,57 @@ export default function SkipJobsListPage() {
           </div>
         </div>
 
-        {/* Jobs list */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        {/* Mobile Card Layout (visible on mobile only) */}
+        <div className="md:hidden space-y-4 pb-24">
           {filteredJobs.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
+            <div className="bg-white rounded-lg shadow-md p-8 text-center text-gray-500">
+              No jobs found. Create your first job!
+            </div>
+          ) : (
+            filteredJobs.map(job => (
+              <div key={job.id} className="bg-white rounded-lg shadow-md p-4 border-l-4" style={{borderLeftColor: job.status === 'completed' ? '#10b981' : job.status === 'in_progress' ? '#f59e0b' : '#3b82f6'}}>
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="text-sm font-bold text-blue-600">{job.docket_no}</div>
+                    <div className="text-xs text-gray-500">{new Date(job.job_date).toLocaleDateString('en-IE')}</div>
+                  </div>
+                  <div className="flex gap-1">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[job.status]}`}>
+                      {job.status}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2 text-sm mb-3">
+                  <div><span className="font-medium">Customer:</span> {job.customer?.name || '-'}</div>
+                  <div><span className="font-medium">Driver:</span> {job.driver?.name || '-'}</div>
+                  {job.truck_reg && <div><span className="font-medium">Truck:</span> {job.truck_reg}</div>}
+                </div>
+                
+                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t">
+                  <a href={`/office/skips/${job.id}`} className="flex-1 text-center px-3 py-2 bg-blue-600 text-white text-sm rounded-md font-medium">
+                    View
+                  </a>
+                  {job.status !== 'completed' && (
+                    <a href={`/office/skips/${job.id}/edit`} className="flex-1 text-center px-3 py-2 bg-orange-600 text-white text-sm rounded-md font-medium">
+                      Edit
+                    </a>
+                  )}
+                  {(job.status === 'created' || job.status === 'sent') && (
+                    <button onClick={() => handleResend(job.id)} className="flex-1 px-3 py-2 bg-green-600 text-white text-sm rounded-md font-medium">
+                      {job.status === 'created' ? 'Send' : 'Resend'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table (hidden on mobile) */}
+        <div className="hidden md:block bg-white rounded-lg shadow-md overflow-hidden">
+          {filteredJobs.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
               No jobs found. Create your first job!
             </div>
           ) : (

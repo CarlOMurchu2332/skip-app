@@ -180,7 +180,7 @@ export default function DriverJobDetailPage() {
 
       {/* Step: Details View */}
       {step === 'details' && (
-        <div className="p-4">
+        <div className="p-4 pb-28">
           {/* Status Banner */}
           <div className={`p-3 rounded-lg mb-4 text-center ${STATUS_COLORS[job?.status || 'created']}`}>
             <span className="font-bold">{STATUS_LABELS[job?.status || 'created']}</span>
