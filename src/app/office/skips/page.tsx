@@ -177,7 +177,7 @@ export default function SkipJobsListPage() {
 
         {/* Today's summary - Fixed contrast */}
         <div className="bg-gradient-to-br from-gray-800/90 to-gray-900/95 backdrop-blur-lg rounded-lg shadow-md p-4 mb-6 border border-gray-700/50">
-          <h2 className="text-lg font-semibold mb-3 text-white">Today's Jobs</h2>
+          <h2 className="text-lg font-semibold mb-3 text-white">Today - Jobs</h2>
           <div className="flex flex-wrap gap-2 text-sm">
             <span className="px-3 py-1.5 bg-gray-700 text-white rounded-full font-medium">
               Total: {todayJobs.length}
